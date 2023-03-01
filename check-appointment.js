@@ -6,7 +6,6 @@ import clear from 'clear';
 import CLI from 'clui';
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-import beepbeep from 'beepbeep';
 import * as path from 'path';
 import {fileURLToPath} from 'url';
 
@@ -31,6 +30,8 @@ switch(config.location) {
     locationId = '94';
   case 'montreal':
     locationId = '91';
+  case 'santiago':
+    locationId = '111';
 }
 
 clear();
@@ -41,7 +42,7 @@ console.log(
   )
 );
 
-const interval = 600000;
+const interval = 10 * 60 * 1000; // 10 minutes
 
 const alertBefore = new Date(config.alert_for_appointment_before);
 
@@ -57,7 +58,7 @@ let checkAvailability = () => {
     let spinner = new CLI.Spinner('Signing in...');
     spinner.start();
 
-    await page.goto('https://ais.usvisa-info.com/en-ca/niv/users/sign_in');
+    await page.goto('https://ais.usvisa-info.com/es-cl/niv/users/sign_in');
     await page.type('#user_email', config.username);
     await page.type('#user_password', config.password);
     await page.$eval('#policy_confirmed', check => check.checked = true);
@@ -69,15 +70,15 @@ let checkAvailability = () => {
     console.log(chalk.green('Signed in!'));
     console.log(chalk.yellow(`Checking at: ${Date().toLocaleString()}`));
 
-    let response = await page.goto(`https://ais.usvisa-info.com/en-ca/niv/schedule/${config.schedule_id}/appointment/days/${locationId}.json?appointments[expedite]=false`);
+    let response = await page.goto(`https://ais.usvisa-info.com/es-cl/niv/schedule/${config.schedule_id}/appointment/days/${locationId}.json?appointments[expedite]=false`);
     let json = await response.json();
     console.log(json.slice(0, 5));
     if (json.length == 0) {
       console.log(chalk.red('No appointments!'));
     } else if(Date.parse(json[0].date) < alertBefore){
-      console.log(chalk.green('Early appointment available!!!'));
-      console.log(chalk.white(json[0].date));
-      beepbeep(5)
+      const text = `Hora disponible el: ${json[0].date}`
+      console.log(chalk.green('text'));
+      sendMessage(text);
     } else {
       console.log(chalk.red('No early appointments!'));
     }
@@ -93,3 +94,7 @@ let checkAvailability = () => {
 }
 
 checkAvailability();
+
+const sendMessage = (text) => Promise.all(config.chat_ids.map(chatId => 
+  fetch(`https://api.telegram.org/bot${config.bot_token}/sendMessage?chat_id=${chatId}&text=${text}`)
+))
