@@ -77,7 +77,7 @@ let checkAvailability = () => {
       console.log(chalk.red('No appointments!'));
     } else if(Date.parse(json[0].date) < alertBefore){
       const text = `Hora disponible el: ${json[0].date}`
-      console.log(chalk.green('text'));
+      console.log(chalk.green(text));
       sendMessage(text);
     } else {
       console.log(chalk.red('No early appointments!'));
