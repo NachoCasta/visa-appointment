@@ -1,8 +1,6 @@
-# US Visa appointment (Canada) checker
+# US Visa appointment checker
 
 The script automates the visa appointment checking.
-
-Note: This tool can only be used for checking the US visa appointment in US Canada consulates.
 
 ## Status of the project
 This is not a scalble/maintainable solution since it has been built in a very short time-frame. It is for personal use only!
